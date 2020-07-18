@@ -1,12 +1,19 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 as builder
 
 RUN apt update && \
     apt upgrade -y && \
-    apt-get install -y git make g++ && \
-    git clone https://github.com/nodchip/Stockfish.git && \
-        sed -i 's/LDFLAGS += -static/#LDFLAGS += -static/g' Stockfish/src/Makefile && \
-        cd Stockfish/src && \
-    make -j4 nnue-gen-sfen-from-original-eval ARCH=x86-64-bmi2
+    apt-get install -y git make g++ wget && \
+    git clone https://github.com/jjoshua2/Stockfish && \
+    cd Stockfish/src && \
+    make -j3 nnue ARCH=x86-64-bmi2 && \
+    wget https://cccfiles.chess.com/engines/nn.bin
+#COPY nn.bin /Stockfish/src/eval/
+RUN wget https://cccfiles.chess.com/engines/nn.bin-jjosh-e959200
+WORKDIR /Stockfish/src
 
-CMD [ "/Stockfish/src/stockfish" ]
-
+FROM ubuntu:20.04
+RUN apt-get update && apt-get install -y libgomp1 wget && apt-get autoremove -y && apt-get autoclean
+COPY --from=0 /Stockfish/src/stockfish /app/
+COPY --from=0 /Stockfish/src/nn.bin-jjosh-e959200 /app/eval/nn.bin
+WORKDIR /app
+CMD ["./stockfish"]
