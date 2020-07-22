@@ -5,9 +5,8 @@ RUN apt update && \
     apt-get install -y git make g++ wget && \
     git clone https://github.com/jjoshua2/Stockfish && \
     cd Stockfish/src && \
-    make -j3 nnue ARCH=x86-64-bmi2 && \
+    CXXFLAGS='-march=native' make -j3 profile-nnue ARCH=x86-64-bmi2 && \
     wget https://cccfiles.chess.com/engines/nn.bin
-#COPY nn.bin /Stockfish/src/eval/
 RUN wget https://cccfiles.chess.com/engines/nn.bin-jjosh-e959200
 WORKDIR /Stockfish/src
 
