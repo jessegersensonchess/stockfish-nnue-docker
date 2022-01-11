@@ -5,7 +5,6 @@ RUN yum -y install git gcc gcc-c++ make && \
   CXXFLAGS='-march=native' make -j2 profile-build ARCH=x86-64
 
 FROM centos:8
-
 WORKDIR /app
 COPY --from=build /Stockfish/src/stockfish ./ 
 RUN adduser stockfish
